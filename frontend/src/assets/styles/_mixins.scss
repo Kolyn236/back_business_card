@@ -1,0 +1,14 @@
+@use './variables' as *;
+
+@mixin container {
+  width: min(calc(100% - 32px), $container-width);
+  margin: 0 auto;
+}
+
+@mixin card {
+  border: 1px solid $line;
+  background: rgba(30, 41, 59, 0.78);
+  border-radius: $radius;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+}

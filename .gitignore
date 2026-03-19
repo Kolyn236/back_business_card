@@ -1,12 +1,13 @@
 
 ###> symfony/framework-bundle ###
-/.env.local
-/.env.local.php
-/.env.*.local
-/config/secrets/prod/prod.decrypt.private.php
-/public/bundles/
-/var/
-/vendor/
+/backend/.env.local
+/backend/.env.local.php
+/backend/.env.*.local
+/backend/config/secrets/prod/prod.decrypt.private.php
+/backend/public/bundles/
+/backend/public/app/
+/backend/var/
+/backend/vendor/
 ###< symfony/framework-bundle ###
 
 # IDE
@@ -21,14 +22,18 @@ Thumbs.db
 *~
 
 # Composer / PHPUnit
-/composer.phar
+/backend/composer.phar
 /.phpunit.result.cache
 /.phpunit.cache/
+/frontend/node_modules/
+/frontend/dist/
+/var/
+/vendor/
 
 # Logs
 *.log
 
 ###> phpunit/phpunit ###
-/phpunit.xml
+/backend/phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
