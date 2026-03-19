@@ -9,13 +9,7 @@ x-app-environment: &app-environment
   MAILER_DSN: ${DOCKER_MAILER_DSN:-smtp://mailer:1025}
   MESSENGER_TRANSPORT_DSN: ${DOCKER_MESSENGER_TRANSPORT_DSN:-redis://redis:6379/messages}
   MESSENGER_FAILED_TRANSPORT_DSN: ${DOCKER_MESSENGER_FAILED_TRANSPORT_DSN:-redis://redis:6379/failed_messages}
-  CACHE_APP_DSN: ${DOCKER_CACHE_APP_DSN:-redis://redis:6379/cache}
-  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
-  TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
-  FEEDBACK_MAIL_FROM: ${FEEDBACK_MAIL_FROM:-no-reply@example.com}
-  FEEDBACK_MAIL_FROM_NAME: ${FEEDBACK_MAIL_FROM_NAME:-Business Card Backend}
-  FEEDBACK_MAIL_TO: ${FEEDBACK_MAIL_TO:-owner@example.com}
-  FEEDBACK_MAIL_ENVELOPE_SENDER: ${FEEDBACK_MAIL_ENVELOPE_SENDER:-no-reply@example.com}
+  CACHE_APP_DSN: ${DOCKER_CACHE_APP_DSN:-redis://redis:6379/1}
 
 x-app-build: &app-build
   context: .
@@ -24,6 +18,11 @@ x-app-build: &app-build
 
 x-app-service: &app-service
   build: *app-build
+  env_file:
+    - path: ./.env
+      required: true
+    - path: ./.env.local
+      required: false
   environment: *app-environment
   restart: unless-stopped
   depends_on:

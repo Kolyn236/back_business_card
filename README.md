@@ -18,12 +18,14 @@ Backend-репозиторий на Symfony 7 для формы "Оффер / п
 docker compose up --build -d
 ```
 
+`app` и `worker` читают `.env.local` как `env_file`, поэтому значения `TELEGRAM_*` и `FEEDBACK_MAIL_*` из локального файла попадают внутрь контейнеров без ручного `export`.
+
 Что поднимется:
 
 - API: `http://localhost:8080`
 - Mailpit UI: `http://localhost:8025`
 - `worker` для `Messenger`
-- `redis` для `async`, `failed` transport и `cache.app`
+- `redis` для `async`, `failed` transport и `cache.app` (cache использует Redis DB `1`)
 
 Полезные команды:
 
@@ -49,7 +51,7 @@ docker compose -f compose.yaml build
 docker compose -f compose.yaml up -d
 ```
 
-Перед запуском задайте production-значения минимум для этих переменных:
+Перед запуском задайте production-значения минимум для этих переменных. Для `TELEGRAM_*` и `FEEDBACK_MAIL_*` создайте `.env.local` рядом с `compose.yaml` или передайте отдельный `--env-file`:
 
 ```dotenv
 DOCKER_APP_ENV=prod
@@ -60,7 +62,7 @@ DOCKER_HTTP_PORT=80
 DOCKER_MAILER_DSN=smtp://user:pass@smtp.example.com:587
 DOCKER_MESSENGER_TRANSPORT_DSN=redis://redis:6379/messages
 DOCKER_MESSENGER_FAILED_TRANSPORT_DSN=redis://redis:6379/failed_messages
-DOCKER_CACHE_APP_DSN=redis://redis:6379/cache
+DOCKER_CACHE_APP_DSN=redis://redis:6379/1
 TELEGRAM_BOT_TOKEN=123456:token
 TELEGRAM_CHAT_ID=-1001234567890
 FEEDBACK_MAIL_FROM=no-reply@example.com
@@ -308,6 +310,7 @@ Email-уведомления отправляются через Symfony Mailer,
 MAILER_DSN=smtp://user:pass@smtp.example.com:587
 MESSENGER_TRANSPORT_DSN=redis://localhost:6379/messages
 MESSENGER_FAILED_TRANSPORT_DSN=redis://localhost:6379/failed_messages
+CACHE_APP_DSN=redis://localhost:6379/1
 FEEDBACK_MAIL_FROM=no-reply@example.com
 FEEDBACK_MAIL_FROM_NAME="Business Card Backend"
 FEEDBACK_MAIL_TO=owner@example.com
