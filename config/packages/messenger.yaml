@@ -13,6 +13,7 @@ framework:
             failed: '%env(MESSENGER_FAILED_TRANSPORT_DSN)%'
 
         routing:
+            App\Feedback\Application\Message\ProcessFeedbackSubmissionMessage: async
             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
             App\Feedback\Infrastructure\Notification\Message\SendTelegramFeedbackMessage: async
 

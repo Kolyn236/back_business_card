@@ -5,50 +5,48 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Feedback\Application\Service;
 
 use App\Feedback\Application\Dto\FeedbackSubmission;
-use App\Feedback\Application\Port\FeedbackSubmissionProcessorInterface;
+use App\Feedback\Application\Message\ProcessFeedbackSubmissionMessage;
 use App\Feedback\Application\Service\SubmitFeedbackService;
 use App\Feedback\Application\Validation\FeedbackValidatorInterface;
 use App\Shared\Application\Exception\NotificationDeliveryException;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 final class SubmitFeedbackServiceTest extends TestCase
 {
-    public function testItValidatesAndProcessesSubmission(): void
+    public function testItValidatesAndQueuesSubmission(): void
     {
         $validator = new InMemoryValidator();
-        $firstProcessor = new InMemoryProcessor();
-        $secondProcessor = new InMemoryProcessor();
+        $messageBus = new InMemoryMessageBus();
 
-        $service = new SubmitFeedbackService($validator, [$firstProcessor, $secondProcessor]);
+        $service = new SubmitFeedbackService($validator, $messageBus);
         $submission = $this->createSubmission();
 
         $result = $service->handle($submission);
 
         self::assertTrue($validator->wasCalled);
         self::assertSame($submission, $validator->submission);
-        self::assertCount(1, $firstProcessor->processed);
-        self::assertCount(1, $secondProcessor->processed);
+        self::assertCount(1, $messageBus->dispatchedMessages);
+        self::assertInstanceOf(ProcessFeedbackSubmissionMessage::class, $messageBus->dispatchedMessages[0]);
+        self::assertSame($submission, $messageBus->dispatchedMessages[0]->submission);
         self::assertSame('ok', $result->status);
-        self::assertSame('Feedback submitted successfully.', $result->message);
+        self::assertSame('Feedback accepted for processing.', $result->message);
+        self::assertSame(202, $result->statusCode);
     }
 
-    public function testItContinuesProcessingAndThrowsFirstFailure(): void
+    public function testItThrowsWhenQueueDispatchFails(): void
     {
         $validator = new InMemoryValidator();
-        $failingProcessor = new InMemoryProcessor(true);
-        $nextProcessor = new InMemoryProcessor();
+        $messageBus = new InMemoryMessageBus(true);
 
-        $service = new SubmitFeedbackService($validator, [$failingProcessor, $nextProcessor]);
+        $service = new SubmitFeedbackService($validator, $messageBus);
 
         $this->expectException(NotificationDeliveryException::class);
-        $this->expectExceptionMessage('Processor failure.');
+        $this->expectExceptionMessage('Feedback submission could not be queued.');
 
-        try {
-            $service->handle($this->createSubmission());
-        } finally {
-            self::assertCount(1, $failingProcessor->processed);
-            self::assertCount(1, $nextProcessor->processed);
-        }
+        $service->handle($this->createSubmission());
     }
 
     private function createSubmission(): FeedbackSubmission
@@ -78,22 +76,29 @@ final class InMemoryValidator implements FeedbackValidatorInterface
     }
 }
 
-final class InMemoryProcessor implements FeedbackSubmissionProcessorInterface
+final class InMemoryMessageBus implements MessageBusInterface
 {
-    /** @var list<FeedbackSubmission> */
-    public array $processed = [];
+    /** @var list<ProcessFeedbackSubmissionMessage> */
+    public array $dispatchedMessages = [];
 
     public function __construct(
         private readonly bool $shouldFail = false,
     ) {
     }
 
-    public function process(FeedbackSubmission $submission): void
+    public function dispatch(object $message, array $stamps = []): Envelope
     {
-        $this->processed[] = $submission;
-
         if ($this->shouldFail) {
-            throw new NotificationDeliveryException('Processor failure.');
+            throw new class () extends \RuntimeException implements ExceptionInterface {
+            };
         }
+
+        if (!$message instanceof ProcessFeedbackSubmissionMessage) {
+            throw new \InvalidArgumentException(sprintf('Unexpected message class "%s".', $message::class));
+        }
+
+        $this->dispatchedMessages[] = $message;
+
+        return new Envelope($message, $stamps);
     }
 }

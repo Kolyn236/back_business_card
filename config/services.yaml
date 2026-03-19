@@ -33,7 +33,12 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Feedback\Application\Service\SubmitFeedbackService:
         arguments:
+            $messageBus: '@messenger.default_bus'
+
+    App\Feedback\Application\MessageHandler\ProcessFeedbackSubmissionMessageHandler:
+        arguments:
             $processors: !tagged_iterator { tag: app.feedback_submission_processor, default_priority_method: getPriority }
+            $cache: '@cache.app'
 
     App\Feedback\Infrastructure\Config\TelegramBotConfig:
         arguments:

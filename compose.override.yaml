@@ -9,6 +9,7 @@ services:
       MAILER_DSN: smtp://mailer:1025
       MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
       MESSENGER_FAILED_TRANSPORT_DSN: redis://redis:6379/failed_messages
+      CACHE_APP_DSN: redis://redis:6379/cache
     volumes:
       - ./:/var/www/html
       - vendor-data:/var/www/html/vendor
@@ -26,6 +27,7 @@ services:
       MAILER_DSN: smtp://mailer:1025
       MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
       MESSENGER_FAILED_TRANSPORT_DSN: redis://redis:6379/failed_messages
+      CACHE_APP_DSN: redis://redis:6379/cache
     volumes:
       - ./:/var/www/html
       - vendor-data:/var/www/html/vendor

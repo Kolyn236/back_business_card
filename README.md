@@ -23,7 +23,7 @@ docker compose up --build -d
 - API: `http://localhost:8080`
 - Mailpit UI: `http://localhost:8025`
 - `worker` для `Messenger`
-- `redis` для `async` и `failed` transport
+- `redis` для `async`, `failed` transport и `cache.app`
 
 Полезные команды:
 
@@ -60,6 +60,7 @@ DOCKER_HTTP_PORT=80
 DOCKER_MAILER_DSN=smtp://user:pass@smtp.example.com:587
 DOCKER_MESSENGER_TRANSPORT_DSN=redis://redis:6379/messages
 DOCKER_MESSENGER_FAILED_TRANSPORT_DSN=redis://redis:6379/failed_messages
+DOCKER_CACHE_APP_DSN=redis://redis:6379/cache
 TELEGRAM_BOT_TOKEN=123456:token
 TELEGRAM_CHAT_ID=-1001234567890
 FEEDBACK_MAIL_FROM=no-reply@example.com
@@ -73,7 +74,7 @@ FEEDBACK_MAIL_ENVELOPE_SENDER=no-reply@example.com
 - `nginx` принимает HTTP-трафик и проксирует PHP-запросы в `app:9000`
 - `app` работает как `php-fpm`
 - `worker` обрабатывает асинхронные email и Telegram notifications
-- `redis` хранит очереди Messenger
+- `redis` хранит очереди Messenger и ключи дедупликации обработки feedback
 
 ## Что делает
 

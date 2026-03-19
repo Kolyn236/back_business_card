@@ -4,21 +4,18 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Feedback;
 
-use App\Tests\Double\Feedback\TestFeedbackSubmissionProcessor;
+use App\Feedback\Application\Message\ProcessFeedbackSubmissionMessage;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport;
 
 final class SubmitFeedbackControllerTest extends WebTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        TestFeedbackSubmissionProcessor::reset();
-    }
-
     public function testItReturnsSuccessForValidPayload(): void
     {
         $client = static::createClient();
+        /** @var InMemoryTransport $transport */
+        $transport = static::getContainer()->get('messenger.transport.async');
+        $transport->reset();
 
         $client->request(
             'POST',
@@ -39,16 +36,19 @@ final class SubmitFeedbackControllerTest extends WebTestCase
             ], JSON_THROW_ON_ERROR),
         );
 
-        self::assertResponseStatusCodeSame(200);
+        self::assertResponseStatusCodeSame(202);
         self::assertResponseHeaderSame('content-type', 'application/json');
         self::assertJsonStringEqualsJsonString(
             json_encode([
                 'status' => 'ok',
-                'message' => 'Feedback submitted successfully.',
+                'message' => 'Feedback accepted for processing.',
             ], JSON_THROW_ON_ERROR),
             $client->getResponse()->getContent(),
         );
-        self::assertCount(1, TestFeedbackSubmissionProcessor::$processedSubmissions);
+
+        $sent = $transport->getSent();
+        self::assertCount(1, $sent);
+        self::assertInstanceOf(ProcessFeedbackSubmissionMessage::class, $sent[0]->getMessage());
     }
 
     public function testItReturnsBadRequestForInvalidJson(): void
@@ -136,36 +136,4 @@ final class SubmitFeedbackControllerTest extends WebTestCase
         self::assertArrayHasKey('consent', $payload['errors']);
     }
 
-    public function testItReturnsBadGatewayWhenNotificationDeliveryFails(): void
-    {
-        TestFeedbackSubmissionProcessor::$shouldFail = true;
-
-        $client = static::createClient();
-
-        $client->request(
-            'POST',
-            '/api/feedback',
-            server: [
-                'CONTENT_TYPE' => 'application/json',
-                'HTTP_ACCEPT' => 'application/json',
-            ],
-            content: json_encode([
-                'name' => 'Nikola Tesla',
-                'email' => 'nikola@example.com',
-                'offerType' => 'Landing page',
-                'message' => 'Need a launch website for a new product line.',
-                'consent' => true,
-            ], JSON_THROW_ON_ERROR),
-        );
-
-        self::assertResponseStatusCodeSame(502);
-        self::assertJsonStringEqualsJsonString(
-            json_encode([
-                'status' => 'error',
-                'code' => 'notification_delivery_failed',
-                'message' => 'Test notification failure.',
-            ], JSON_THROW_ON_ERROR),
-            $client->getResponse()->getContent(),
-        );
-    }
 }
