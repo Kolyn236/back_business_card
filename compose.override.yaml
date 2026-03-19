@@ -1,12 +1,49 @@
-
 services:
-###> symfony/mailer ###
+  app:
+    build:
+      target: dev
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+      DEFAULT_URI: http://localhost:${HTTP_PORT:-8080}
+      MAILER_DSN: smtp://mailer:1025
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
+      MESSENGER_FAILED_TRANSPORT_DSN: redis://redis:6379/failed_messages
+    volumes:
+      - ./:/var/www/html
+      - vendor-data:/var/www/html/vendor
+      - var-data:/var/www/html/var
+
+  worker:
+    build:
+      target: dev
+    command: ["/bin/sh", "-lc", "until [ -f vendor/autoload.php ]; do sleep 1; done; php bin/console messenger:consume async --time-limit=3600 --memory-limit=256M --no-interaction"]
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+      DEFAULT_URI: http://localhost:${HTTP_PORT:-8080}
+      SKIP_COMPOSER_INSTALL: 1
+      MAILER_DSN: smtp://mailer:1025
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
+      MESSENGER_FAILED_TRANSPORT_DSN: redis://redis:6379/failed_messages
+    volumes:
+      - ./:/var/www/html
+      - vendor-data:/var/www/html/vendor
+      - var-data:/var/www/html/var
+
+  nginx:
+    volumes:
+      - ./public:/var/www/html/public:ro
+
   mailer:
     image: axllent/mailpit
     ports:
-      - "1025"
-      - "8025"
+      - "1025:1025"
+      - "8025:8025"
     environment:
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
-###< symfony/mailer ###
+
+volumes:
+  vendor-data:
+  var-data:
