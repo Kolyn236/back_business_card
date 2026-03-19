@@ -6,50 +6,29 @@ namespace App\Feedback\Infrastructure\Notification;
 
 use App\Feedback\Application\Dto\FeedbackSubmission;
 use App\Feedback\Application\Port\FeedbackSubmissionProcessorInterface;
-use App\Feedback\Infrastructure\Config\TelegramBotConfig;
-use App\Feedback\Infrastructure\Notification\Formatting\FeedbackNotificationFormatter;
+use App\Feedback\Infrastructure\Notification\Message\SendTelegramFeedbackMessage;
 use App\Shared\Application\Exception\NotificationDeliveryException;
-use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 final readonly class TelegramFeedbackProcessor implements FeedbackSubmissionProcessorInterface
 {
     public function __construct(
-        private HttpClientInterface $httpClient,
-        private TelegramBotConfig $config,
-        private FeedbackNotificationFormatter $formatter,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
     public function process(FeedbackSubmission $submission): void
     {
         try {
-            $response = $this->httpClient->request('POST', sprintf(
-                'https://api.telegram.org/bot%s/sendMessage',
-                $this->config->botToken,
-            ), [
-                'json' => [
-                    'chat_id' => $this->config->chatId,
-                    'text' => $this->formatter->formatTelegram($submission),
-                    'parse_mode' => 'HTML',
-                    'disable_web_page_preview' => true,
-                ],
-                'timeout' => 10,
-            ]);
-
-            $statusCode = $response->getStatusCode();
-
-            if ($statusCode >= 400) {
-                throw new NotificationDeliveryException(sprintf('Telegram API returned status %d.', $statusCode));
-            }
-
-            $payload = $response->toArray(false);
-
-            if (($payload['ok'] ?? false) !== true) {
-                throw new NotificationDeliveryException('Telegram API returned an unsuccessful response.');
-            }
+            $this->messageBus->dispatch(new SendTelegramFeedbackMessage($submission));
         } catch (ExceptionInterface $exception) {
-            throw new NotificationDeliveryException('Telegram notification failed.', 0, $exception);
+            throw new NotificationDeliveryException('Telegram notification could not be queued.', 0, $exception);
         }
+    }
+
+    public static function getPriority(): int
+    {
+        return 200;
     }
 }

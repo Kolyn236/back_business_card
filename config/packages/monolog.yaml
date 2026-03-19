@@ -1,6 +1,8 @@
 monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - mailer
+        - telegram
 
 when@dev:
     monolog:
@@ -14,6 +16,16 @@ when@dev:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine", "!console"]
+            mailer:
+                type: stream
+                path: "%kernel.logs_dir%/mailer_%kernel.environment%.log"
+                level: info
+                channels: ["mailer"]
+            telegram:
+                type: stream
+                path: "%kernel.logs_dir%/telegram_%kernel.environment%.log"
+                level: info
+                channels: ["telegram"]
 
 when@test:
     monolog:
@@ -28,6 +40,16 @@ when@test:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
+            mailer:
+                type: stream
+                path: "%kernel.logs_dir%/mailer_%kernel.environment%.log"
+                level: info
+                channels: ["mailer"]
+            telegram:
+                type: stream
+                path: "%kernel.logs_dir%/telegram_%kernel.environment%.log"
+                level: info
+                channels: ["telegram"]
 
 when@prod:
     monolog:
@@ -53,3 +75,15 @@ when@prod:
                 channels: [deprecation]
                 path: php://stderr
                 formatter: monolog.formatter.json
+            mailer:
+                type: stream
+                path: php://stderr
+                level: info
+                formatter: monolog.formatter.json
+                channels: ["mailer"]
+            telegram:
+                type: stream
+                path: php://stderr
+                level: info
+                formatter: monolog.formatter.json
+                channels: ["telegram"]

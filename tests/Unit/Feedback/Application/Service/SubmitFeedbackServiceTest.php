@@ -32,13 +32,13 @@ final class SubmitFeedbackServiceTest extends TestCase
         self::assertSame('Feedback submitted successfully.', $result->message);
     }
 
-    public function testItStopsWhenProcessorFails(): void
+    public function testItContinuesProcessingAndThrowsFirstFailure(): void
     {
         $validator = new InMemoryValidator();
         $failingProcessor = new InMemoryProcessor(true);
-        $neverCalledProcessor = new InMemoryProcessor();
+        $nextProcessor = new InMemoryProcessor();
 
-        $service = new SubmitFeedbackService($validator, [$failingProcessor, $neverCalledProcessor]);
+        $service = new SubmitFeedbackService($validator, [$failingProcessor, $nextProcessor]);
 
         $this->expectException(NotificationDeliveryException::class);
         $this->expectExceptionMessage('Processor failure.');
@@ -47,7 +47,7 @@ final class SubmitFeedbackServiceTest extends TestCase
             $service->handle($this->createSubmission());
         } finally {
             self::assertCount(1, $failingProcessor->processed);
-            self::assertCount(0, $neverCalledProcessor->processed);
+            self::assertCount(1, $nextProcessor->processed);
         }
     }
 

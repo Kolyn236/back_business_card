@@ -8,6 +8,7 @@ use App\Feedback\Application\Dto\FeedbackSubmission;
 use App\Feedback\Application\Port\FeedbackSubmissionProcessorInterface;
 use App\Feedback\Application\Response\SubmitFeedbackResult;
 use App\Feedback\Application\Validation\FeedbackValidatorInterface;
+use App\Shared\Application\Exception\NotificationDeliveryException;
 
 final readonly class SubmitFeedbackService
 {
@@ -24,8 +25,18 @@ final readonly class SubmitFeedbackService
     {
         $this->validator->validate($submission);
 
+        $firstFailure = null;
+
         foreach ($this->processors as $processor) {
-            $processor->process($submission);
+            try {
+                $processor->process($submission);
+            } catch (NotificationDeliveryException $exception) {
+                $firstFailure ??= $exception;
+            }
+        }
+
+        if ($firstFailure instanceof NotificationDeliveryException) {
+            throw $firstFailure;
         }
 
         return new SubmitFeedbackResult(

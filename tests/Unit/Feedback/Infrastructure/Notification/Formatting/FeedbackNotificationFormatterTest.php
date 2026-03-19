@@ -22,6 +22,25 @@ final class FeedbackNotificationFormatterTest extends TestCase
         self::assertStringContainsString('<b>Consent:</b> Yes', $message);
     }
 
+    public function testItTruncatesLongTelegramMessageBody(): void
+    {
+        $formatter = new FeedbackNotificationFormatter();
+
+        $message = $formatter->formatTelegram(new FeedbackSubmission(
+            name: 'Nikola Tesla',
+            email: 'nikola@example.com',
+            company: 'Acme Studio',
+            offerType: 'Landing page',
+            budget: '$2k-$5k',
+            message: str_repeat('A', 5000),
+            timeline: '2-3 weeks',
+            consent: true,
+        ));
+
+        self::assertLessThan(4096, mb_strlen($message));
+        self::assertStringContainsString("…", $message);
+    }
+
     public function testItFormatsPlainTextEmailMessage(): void
     {
         $formatter = new FeedbackNotificationFormatter();

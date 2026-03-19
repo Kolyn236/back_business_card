@@ -8,6 +8,8 @@ use App\Feedback\Application\Dto\FeedbackSubmission;
 
 final class FeedbackNotificationFormatter
 {
+    private const TELEGRAM_MESSAGE_MAX_LENGTH = 3500;
+
     public function formatTelegram(FeedbackSubmission $submission): string
     {
         $lines = [
@@ -22,7 +24,7 @@ final class FeedbackNotificationFormatter
             sprintf('<b>Consent:</b> %s', $submission->consent ? 'Yes' : 'No'),
             '',
             '<b>Message:</b>',
-            $this->escape($submission->message),
+            $this->escape($this->truncateTelegramText($submission->message)),
         ];
 
         return implode("\n", $lines);
@@ -88,5 +90,14 @@ HTML, implode('', $details), $message);
     private function escape(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    private function truncateTelegramText(string $value): string
+    {
+        if (mb_strlen($value) <= self::TELEGRAM_MESSAGE_MAX_LENGTH) {
+            return $value;
+        }
+
+        return rtrim(mb_substr($value, 0, self::TELEGRAM_MESSAGE_MAX_LENGTH - 1)).'…';
     }
 }

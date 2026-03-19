@@ -2,6 +2,16 @@ services:
     App\Tests\Double\Feedback\TestFeedbackSubmissionProcessor:
         tags: ['app.test_feedback_submission_processor']
 
+    App\Feedback\Infrastructure\Notification\EmailFeedbackProcessor:
+        public: true
+        autowire: true
+        autoconfigure: true
+
+    App\Feedback\Infrastructure\Notification\TelegramFeedbackProcessor:
+        public: true
+        autowire: true
+        autoconfigure: true
+
     App\Feedback\Application\Service\SubmitFeedbackService:
         autowire: true
         autoconfigure: true
