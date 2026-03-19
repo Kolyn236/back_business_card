@@ -23,6 +23,12 @@ Thumbs.db
 # Composer / PHPUnit
 /composer.phar
 /.phpunit.result.cache
+/.phpunit.cache/
 
 # Logs
 *.log
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###

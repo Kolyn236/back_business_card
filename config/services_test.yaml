@@ -1,0 +1,9 @@
+services:
+    App\Tests\Double\Feedback\TestFeedbackSubmissionProcessor:
+        tags: ['app.test_feedback_submission_processor']
+
+    App\Feedback\Application\Service\SubmitFeedbackService:
+        autowire: true
+        autoconfigure: true
+        arguments:
+            $processors: !tagged_iterator app.test_feedback_submission_processor

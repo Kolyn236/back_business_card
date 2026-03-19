@@ -31,7 +31,7 @@ final readonly class FeedbackRequestMapper
             throw new InvalidJsonException('Request body must contain valid JSON.', 0, $exception);
         }
 
-        if (!is_array($payload)) {
+        if (!is_array($payload) || array_is_list($payload)) {
             throw new InvalidRequestPayloadException('Request body must be a JSON object.');
         }
 
