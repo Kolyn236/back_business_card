@@ -11,7 +11,7 @@
 - `frontend/` - SPA на Vue 3 + Vite
 - `backend/` - API на Symfony 7.4 для формы обратной связи
 
-Фронтенд собирается в [`backend/public/app`](/home/nikola/projects/back_business_card/backend/public/app), а backend принимает запросы на [`POST /api/feedback`](/home/nikola/projects/back_business_card/backend/src/Feedback/Presentation/Http/Controller/SubmitFeedbackController.php#L16).
+Фронтенд собирается в [`backend/public/app`](backend/public/app), а backend принимает запросы на [`POST /api/feedback`](backend/src/Feedback/Presentation/Http/Controller/SubmitFeedbackController.php#L16).
 
 ### Что умеет проект
 
@@ -128,7 +128,7 @@ docker compose -f docker-compose.yml build
 docker compose -f docker-compose.yml up -d
 ```
 
-Сборка фронтенда попадает в [`backend/public/app`](/home/nikola/projects/back_business_card/backend/public/app), откуда её раздаёт Nginx.
+Сборка фронтенда попадает в [`backend/public/app`](backend/public/app), откуда её раздаёт Nginx.
 
 ### API формы
 
@@ -197,7 +197,7 @@ The project has two main parts:
 - `frontend/` - a Vue 3 + Vite SPA
 - `backend/` - a Symfony 7.4 API for the contact/feedback form
 
-The frontend build is generated into [`backend/public/app`](/home/nikola/projects/back_business_card/backend/public/app), while the backend handles requests at [`POST /api/feedback`](/home/nikola/projects/back_business_card/backend/src/Feedback/Presentation/Http/Controller/SubmitFeedbackController.php#L16).
+The frontend build is generated into [`backend/public/app`](backend/public/app), while the backend handles requests at [`POST /api/feedback`](backend/src/Feedback/Presentation/Http/Controller/SubmitFeedbackController.php#L16).
 
 ### What the project does
 
@@ -314,7 +314,7 @@ docker compose -f docker-compose.yml build
 docker compose -f docker-compose.yml up -d
 ```
 
-The frontend output is placed into [`backend/public/app`](/home/nikola/projects/back_business_card/backend/public/app) and then served by Nginx.
+The frontend output is placed into [`backend/public/app`](backend/public/app) and then served by Nginx.
 
 ### Feedback API
 
