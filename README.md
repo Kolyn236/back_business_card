@@ -182,9 +182,9 @@ npm run build
 
 ### Дополнительные материалы
 
-- backend details: [backend/README.md](/home/nikola/projects/back_business_card/backend/README.md)
-- frontend details: [frontend/README.md](/home/nikola/projects/back_business_card/frontend/README.md)
-- deployment notes: [deploy/README.md](/home/nikola/projects/back_business_card/deploy/README.md)
+- backend details: [backend/README.md](backend/README.md)
+- frontend details: [frontend/README.md](frontend/README.md)
+- deployment notes: [deploy/README.md](deploy/README.md)
 
 ---
 
@@ -368,6 +368,6 @@ npm run build
 
 ### Extra docs
 
-- backend details: [backend/README.md](/home/nikola/projects/back_business_card/backend/README.md)
-- frontend details: [frontend/README.md](/home/nikola/projects/back_business_card/frontend/README.md)
-- deployment notes: [deploy/README.md](/home/nikola/projects/back_business_card/deploy/README.md)
+- backend details: [backend/README.md](backend/README.md)
+- frontend details: [frontend/README.md](frontend/README.md)
+- deployment notes: [deploy/README.md](deploy/README.md)
